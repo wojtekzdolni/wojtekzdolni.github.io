@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Zadania</title>
+</head>
+
+<body>
+    <header>
+        <h1>Omówienia zadań</h1>
+    </header>
+    <main>
+        <div class="search-container">
+            <input type="text" id="searchInput" onkeyup="filterTasks()" placeholder="Wyszukaj zadania...">
+            <button id="searchButton" onclick="toggleFilterTags()">Filtruj</button>
+            <div id="filter-tags-window" style="display:none;">
+                <button id="close-button" onclick="toggleFilterTags()">X</button>
+                <input type="text" id="tagSearchInput" onkeyup="filterAvailableTags()" placeholder="Wyszukaj tagi...">
+                <div id="filter-tags"></div>
+            </div>
+            <div id="selected-tags"></div>
+        </div>
+        <div id="no-results" style="display:none;">Brak wyników wyszukiwania.</div>
+        </div>
+        <section id="grupa-a">
+            <h2>Grupa A</h2>
+            <ul>
+                <li>
+                    <a href="zadanie1.html">Zadanie 1</a>
+                    <span class="tag">Matematyka</span>
+                </li>
+                <li>
+                    <a href="zadanie2.html">Zadanie 2</a>
+                    <span class="tag">Fizyka</span>
+                </li>
+                <li>
+                    <a href="zadanie3.html">Zadanie 3</a>
+                    <span class="tag">Chemia</span>
+                </li>
+            </ul>
+        </section>
+        <section id="grupa-b">
+            <h2>Grupa B</h2>
+            <ul>
+                <li>
+                    <a href="zadanie4.html">Zadanie 4</a>
+                    <span class="tag">Matematyka</span>
+                </li>
+                <li>
+                    <a href="zadanie5.html">Zadanie 5</a>
+                    <span class="tag">Fizyka</span>
+                </li>
+                <li>
+                    <a href="zadanie6.html">Zadanie 6</a>
+                    <span class="tag">Chemia</span>
+                </li>
+            </ul>
+        </section>
+        <section id="grupa-c">
+            <h2>Grupa C</h2>
+            <ul>
+                <li>
+                    <a href="zadanie7.html">Zadanie 7</a>
+                    <span class="tag">Matematyka</span>
+                </li>
+                <li>
+                    <a href="zadanie8.html">Zadanie 8</a>
+                    <span class="tag">Fizyka</span>
+                </li>
+                <li>
+                    <a href="zadanie9.html">Zadanie 9</a>
+                    <span class="tag">Chemia</span>
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script>
+        let selectedTags = new Set();
+
+        function toggleFilterTags() {
+            const filterTagsWindow = document.getElementById("filter-tags-window");
+            if (filterTagsWindow.style.display === "none") {
+                const allTags = getAllTags();
+                const filterTagsDiv = document.getElementById("filter-tags");
+                filterTagsDiv.innerHTML = "";
+
+                for (const tag of allTags) {
+                    if (!selectedTags.has(tag)) {
+                        const tagElement = document.createElement("span");
+                        tagElement.classList.add("filter-tag");
+                        tagElement.textContent = tag;
+                        tagElement.onclick = function () {
+                            addFilterTag(tag);
+                            tagElement.style.display = "none";
+                        };
+                        filterTagsDiv.appendChild(tagElement);
+                    }
+                }
+
+                filterTagsWindow.style.display = "block";
+            } else {
+                filterTagsWindow.style.display = "none";
+            }
+        }
+
+        function filterAvailableTags() {
+            const tagSearchInput = document.getElementById("tagSearchInput");
+            const filter = tagSearchInput.value.toUpperCase();
+            const filterTagsDiv = document.getElementById("filter-tags");
+            const tagElements = filterTagsDiv.getElementsByClassName("filter-tag");
+
+            for (const tagElement of tagElements) {
+                const tagName = tagElement.textContent || tagElement.innerText;
+                const tagNameUpper = tagName.toUpperCase();
+                if (tagNameUpper.indexOf(filter) > -1 && !selectedTags.has(tagNameUpper)) {
+                    tagElement.style.display = "";
+                } else {
+                    tagElement.style.display = "none";
+                }
+            }
+        }
+
+        function getAllTags() {
+            const sections = document.getElementsByTagName("section");
+            const tagSet = new Set();
+
+            for (const section of sections) {
+                const ul = section.getElementsByTagName("ul")[0];
+                const li = ul.getElementsByTagName("li");
+
+                for (const task of li) {
+                    const tag = task.getElementsByClassName("tag")[0];
+                    const tagName = tag.textContent || tag.innerText;
+                    tagSet.add(tagName);
+                }
+            }
+
+            return Array.from(tagSet);
+        }
+
+        function addFilterTag(tag) {
+            if (!selectedTags.has(tag)) {
+                selectedTags.add(tag);
+
+                const selectedTagsDiv = document.getElementById("selected-tags");
+                const tagElement = document.createElement("span");
+                tagElement.classList.add("selected-tag");
+                tagElement.textContent = tag;
+                tagElement.onclick = function () {
+                    removeFilterTag(tag);
+                    selectedTagsDiv.removeChild(tagElement);
+                    filterAvailableTags();
+                };
+
+                selectedTagsDiv.appendChild(tagElement);
+
+                filterTasks();
+            }
+        }
+
+        function removeFilterTag(tag) {
+            selectedTags.delete(tag);
+            filterTasks();
+            filterAvailableTags();
+        }
+
+        function filterTasks() {
+            const searchInput = document.getElementById("searchInput");
+            const filter = searchInput.value.toUpperCase();
+            const sections = document.getElementsByTagName("section");
+
+            for (const section of sections) {
+                const ul = section.getElementsByTagName("ul")[0];
+                const li = ul.getElementsByTagName("li");
+
+                for (const task of li) {
+                    const taskName = task.textContent || task.innerText;
+                    const taskTag = task.getElementsByClassName("tag")[0].textContent || task.getElementsByClassName("tag")[0].innerText;
+                    const matchesSearch = taskName.toUpperCase().indexOf(filter) > -1;
+                    const matchesTags = selectedTags.size === 0 || selectedTags.has(taskTag);
+
+                    if (matchesSearch && matchesTags) {
+                        task.style.display = "";
+                    } else {
+                        task.style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
